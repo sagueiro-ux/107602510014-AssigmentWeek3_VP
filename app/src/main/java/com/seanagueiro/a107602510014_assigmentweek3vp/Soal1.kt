@@ -52,7 +52,6 @@ data class ScreenText(
     val line2: String
 )
 
-//View Soal1
 @Composable
 fun Soal1View() {
     var state by remember { mutableStateOf(ReactionState.INITIAL) }

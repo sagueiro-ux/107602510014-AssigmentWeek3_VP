@@ -165,7 +165,7 @@ fun Bonus2View() {
             }
         }
 
-     // Bagian Status
+     // Status
         Row(
             modifier = Modifier
                 .align(Alignment.BottomStart)

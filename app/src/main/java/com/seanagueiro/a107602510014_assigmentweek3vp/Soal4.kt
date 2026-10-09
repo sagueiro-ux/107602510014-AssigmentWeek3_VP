@@ -20,9 +20,7 @@ enum class Rps(val emoji: String, val label: String) {
     PAPER("✋", "Paper"),
     SCISSOR("✌️", "Scissor");
     fun beats(other: Rps): Boolean {
-        return (this == ROCK && other == SCISSOR) ||
-                (this == PAPER && other == ROCK) ||
-                (this == SCISSOR && other == PAPER)
+        return (this == ROCK && other == SCISSOR) || (this == PAPER && other == ROCK) || (this == SCISSOR && other == PAPER)
     }
 }
 enum class RpsState { INITIAL, PICK, REVEAL, FINISHED }
@@ -36,22 +34,16 @@ fun Soal4View() {
     val bestOf = 5
     val target = bestOf / 2 + 1
 
-    // ---- STATE ----
-    // rememberSaveable = nilainya tetap ada walaupun layar diputar
     var state by rememberSaveable { mutableStateOf(RpsState.INITIAL) }
     var yourScore by rememberSaveable { mutableStateOf(0) }
     var cpuScore by rememberSaveable { mutableStateOf(0) }
-    var bestScore by rememberSaveable { mutableStateOf<Int?>(null) }  // null = belum ada
+    var bestScore by rememberSaveable { mutableStateOf<Int?>(null) }
     var playerPick by rememberSaveable { mutableStateOf<Rps?>(null) }
     var cpuPick by rememberSaveable { mutableStateOf<Rps?>(null) }
     var result by rememberSaveable { mutableStateOf<RoundResult?>(null) }
-
-    // Urutan tombol (diacak tiap ronde)
     var options by remember { mutableStateOf(Rps.values().toList().shuffled()) }
 
-    // ---- FUNGSI ----
-
-    // Mulai / restart match
+    //Function
     fun startMatch() {
         yourScore = 0
         cpuScore = 0
@@ -62,7 +54,6 @@ fun Soal4View() {
         state = RpsState.PICK
     }
 
-    // Exit -> kembali ke tampilan awal
     fun exitMatch() {
         yourScore = 0
         cpuScore = 0
@@ -72,9 +63,8 @@ fun Soal4View() {
         state = RpsState.INITIAL
     }
 
-    // Pemain memilih
     fun pickMove(choice: Rps) {
-        val cpu = Rps.values().random()   // komputer memilih acak
+        val cpu = Rps.values().random()
 
         val roundResult = if (choice == cpu) {
             RoundResult.DRAW
@@ -83,7 +73,6 @@ fun Soal4View() {
         } else {
             RoundResult.LOSE
         }
-
         if (roundResult == RoundResult.WIN) yourScore += 1
         if (roundResult == RoundResult.LOSE) cpuScore += 1
 
@@ -93,13 +82,11 @@ fun Soal4View() {
         state = RpsState.REVEAL
     }
 
-    // ---- REVEAL: tunggu 700 ms lalu lanjut otomatis ----
     LaunchedEffect(state) {
         if (state == RpsState.REVEAL) {
             delay(700)
 
             if (yourScore >= target || cpuScore >= target) {
-                // Match selesai. Best score = selisih skor terbaik.
                 val diff = yourScore - cpuScore
                 val oldBest = bestScore
                 if (oldBest == null || diff > oldBest) {
@@ -107,7 +94,6 @@ fun Soal4View() {
                 }
                 state = RpsState.FINISHED
             } else {
-                // Ronde berikutnya (reset pilihan & acak tombol)
                 playerPick = null
                 cpuPick = null
                 result = null
@@ -117,14 +103,13 @@ fun Soal4View() {
         }
     }
 
-    // ---- TAMPILAN ----
+    // View
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        // Header skor (selalu tampil)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -146,8 +131,6 @@ fun Soal4View() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             when (state) {
-
-                // ===== Tampilan awal =====
                 RpsState.INITIAL -> {
                     Text("Rock • Paper • Scissors", fontSize = 25.sp)
                     Spacer(Modifier.height(25.dp))
@@ -159,7 +142,6 @@ fun Soal4View() {
                     }
                 }
 
-                // ===== Pemain memilih =====
                 RpsState.PICK -> {
                     Text("Pick your move!", fontSize = 18.sp)
                     Spacer(Modifier.height(8.dp))
@@ -167,7 +149,6 @@ fun Soal4View() {
                     Spacer(Modifier.height(24.dp))
 
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        // options sudah diacak, jadi urutan tombol berubah tiap ronde
                         for (rps in options) {
                             Button(
                                 onClick = { pickMove(rps) },
@@ -179,7 +160,6 @@ fun Soal4View() {
                     }
                 }
 
-                // ===== Reveal =====
                 RpsState.REVEAL -> {
                     Text(
                         "${playerPick?.emoji} VS ${cpuPick?.emoji}",
@@ -199,7 +179,7 @@ fun Soal4View() {
                     )
                 }
 
-                // ===== Match selesai =====
+                // Selesai game
                 RpsState.FINISHED -> {
                     val youWon = yourScore > cpuScore
                     Text(

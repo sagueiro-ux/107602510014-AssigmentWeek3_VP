@@ -21,34 +21,22 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
-// data class = class untuk menyimpan data.
-// Semua aturan game (tap & upgrade) ada di sini, jadi tampilan tinggal memanggilnya.
 data class CatState(
-    val coins: Int = 0,          // jumlah coin
-    val valuePerTap: Int = 1,    // coin per tekan (awal 1)
-    val upgradeCost: Int = 10    // harga upgrade (awal 10)
+    val coins: Int = 0,
+    val valuePerTap: Int = 1,
+    val upgradeCost: Int = 10
 ) {
-    // value setelah upgrade = value sekarang x 1.5 (dibulatkan)
     val nextValue: Int
         get() = (valuePerTap * 1.5).roundToInt()
-
-    // true kalau coin cukup untuk upgrade
     val canUpgrade: Boolean
         get() = coins >= upgradeCost
-
-    // kekurangan coin untuk upgrade
     val missingCoins: Int
         get() = upgradeCost - coins
-
-    // Kucing ditekan -> coin bertambah sebesar valuePerTap.
-    // copy() = membuat salinan data dengan sedikit perubahan.
     fun tap(): CatState {
         return copy(coins = coins + valuePerTap)
     }
-
-    // Upgrade -> bayar coin, value x1.5, harga x2
     fun upgrade(): CatState {
-        if (!canUpgrade) return this   // coin kurang, tidak terjadi apa-apa
+        if (!canUpgrade) return this
         return copy(
             coins = coins - upgradeCost,
             valuePerTap = nextValue,
@@ -56,26 +44,14 @@ data class CatState(
         )
     }
 }
-
-/* =====================================================
-   2. TAMPILAN
-   ===================================================== */
-
-// Gambar di res/drawable dengan nama:
-// cat_background, cat_closed (mulut tertutup), cat_open (mulut terbuka)
-
-@Composable   // <-- @Composable HARUS tepat di atas "fun"
+@Composable
 fun Soal2View() {
     var game by remember { mutableStateOf(CatState()) }
-    var tapCount by remember { mutableStateOf(0) }        // dihitung tiap kucing ditekan
-    var recentTap by remember { mutableStateOf(false) }   // true sesaat setelah ditekan
-
-    // Untuk mengetahui apakah kucing sedang ditahan jari
+    var tapCount by remember { mutableStateOf(0) }
+    var recentTap by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    // Setiap tap, blok ini dijalankan ulang dari awal.
-    // Jadi kalau di-spam, recentTap tidak sempat jadi false -> mulut tetap terbuka.
     LaunchedEffect(tapCount) {
         if (tapCount > 0) {
             recentTap = true
@@ -83,8 +59,6 @@ fun Soal2View() {
             recentTap = false
         }
     }
-
-    // Mulut terbuka kalau sedang ditahan ATAU baru saja ditekan
     val mouthOpen = isPressed || recentTap
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -103,7 +77,6 @@ fun Soal2View() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // ---------- BAGIAN ATAS: coin ----------
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.35f))
@@ -128,7 +101,6 @@ fun Soal2View() {
                 }
             }
 
-            // ---------- BAGIAN TENGAH: kucing ----------
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     "Tap the Cat!",
@@ -151,8 +123,8 @@ fun Soal2View() {
                             interactionSource = interactionSource,
                             indication = null
                         ) {
-                            game = game.tap()   // tambah coin
-                            tapCount++          // memicu LaunchedEffect di atas
+                            game = game.tap()
+                            tapCount++
                         }
                 )
 
@@ -160,7 +132,6 @@ fun Soal2View() {
                 Text(if (mouthOpen) "Meow!" else "Purr~", color = Color.White, fontSize = 16.sp)
             }
 
-            // ---------- BAGIAN BAWAH: upgrade ----------
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
@@ -186,7 +157,7 @@ fun Soal2View() {
 
                     Button(
                         onClick = { game = game.upgrade() },
-                        enabled = game.canUpgrade,   // tidak bisa ditekan kalau coin kurang
+                        enabled = game.canUpgrade,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(

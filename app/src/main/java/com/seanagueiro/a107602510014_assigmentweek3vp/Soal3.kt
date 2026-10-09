@@ -48,7 +48,6 @@ data class Question(
 // Membuat soal baru biar bisa acak
 fun makeQuestion(): Question {
     val word = ColorName.values().random()
-    // warna tinta dibuat berbeda dari kata supaya soal tidak ambigu
     val ink = ColorName.values().filter { it != word }.random()
     val mode = ColorMode.values().random()
     return Question(mode, word, ink, Random.nextBoolean())
