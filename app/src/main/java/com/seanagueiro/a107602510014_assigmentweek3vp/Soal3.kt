@@ -57,7 +57,6 @@ const val TIME_LIMIT_MS = 5000
 const val MAX_STRIKES = 3
 @Composable
 fun Soal3View(){
-    // ---- STATE ----
     var gameState by remember { mutableStateOf(ColorGameState.INITIAL) }
     var score by remember { mutableStateOf(0) }
     var strikes by remember { mutableStateOf(0) }
